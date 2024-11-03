@@ -295,4 +295,114 @@ describe("Space information", () => {
       }
     );
   });
+
+  test("User is able to create a space", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "MySpace",
+        length: 100,
+        breadth: 200,
+        mapId,
+      },
+      {
+        header: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.spaceId).toBeDefined();
+  });
+
+  test("User is able to create a space without mapid", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "MySpace",
+        length: 100,
+        breadth: 200,
+      },
+      {
+        header: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.spaceId).toBeDefined();
+  });
+
+  test("User is not able to create a space without mapid and dimensions", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "MySpace",
+      },
+      {
+        header: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.statusCode).toBe(400);
+  });
+
+  test("User is not able to delete a space that is not created", async () => {
+    const response = await axios.delete(
+      `${BACKEND_URL}/api/v1/space/randomIdThatDoesNotExist`,
+      {
+        name: "MySpace",
+      },
+      {
+        header: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.statusCode).toBe(400);
+  });
+
+  test("User is not able to delete a space that is not created", async () => {
+    const response = await axios.delete(
+      `${BACKEND_URL}/api/v1/space/randomIdThatDoesNotExist`,
+      {
+        header: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.statusCode).toBe(400);
+  });
+
+  test("User is not able to delete a space of another user", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "MySpace",
+        length: 100,
+        breadth: 200,
+      },
+      {
+        header: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+
+    const deleteResponse = await axios.delete(
+      `${BACKEND_URL}/api/v1/space/${response.data.spaceId}`,
+      {
+        header: {
+          authorization: `Bearer ${adminToken}`,
+        },
+      }
+    );
+    expect(response.statusCode).toBe(400);
+  });
+
+  test("Admin has no space initially", async () => {
+    const response = await axios.get(`${BACKEND_URL}/api/v1/space/all`, {
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    expect(response.data.spaces.length).toBe(0);
+  });
 });
