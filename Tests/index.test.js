@@ -1,6 +1,115 @@
 const axios = require("axios");
 
-BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL = "http://localhost:3000";
+const WEBSOCKET_URL = "http://localhost:3001";
+
+async function setupHTTP() {
+  const username = "Aditya" + Math.random() * 100;
+  const password = "password";
+  const adminSignUpResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+    username,
+    password,
+    type: "admin",
+  });
+  adminId = adminSignUpResponse.data.userId;
+  const adminSignInresponse = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+    username,
+    password,
+  });
+  adminToken = adminSignInresponse.data.token;
+
+  const userSignUpResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+    username: username + "-user",
+    password,
+    type: "user",
+  });
+  userId = userSignUpResponse.data.userId;
+  const userSignInresponse = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+    username: username + "-user",
+    password,
+  });
+  userToken = userSignInresponse.data.token;
+
+  const element1 = await axios.post(
+    `${BACKEND_URL}/api/v1/admin/element`,
+    {
+      imageURL: "image_URL",
+      width: 1,
+      height: 1,
+      static: true,
+    },
+    {
+      header: {
+        authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+
+  const element2 = await axios.post(
+    `${BACKEND_URL}/api/v1/admin/element`,
+    {
+      imageURL: "image_URL",
+      width: 1,
+      height: 1,
+      static: true,
+    },
+    {
+      header: {
+        authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+
+  element1Id = element1.id;
+  element2Id = element2.id;
+
+  const map = await axios.post(
+    `${BACKEND_URL}/api/v1/admin/map`,
+    {
+      thumbnailURL: "thumbnail_url",
+      dimensions: "100x200",
+      defaultElements: [
+        {
+          elementid: element1Id,
+          x: 20,
+          y: 30,
+        },
+        {
+          elementid: element1Id,
+          x: 25,
+          y: 35,
+        },
+        {
+          elementid: element2Id,
+          x: 23,
+          y: 12,
+        },
+      ],
+    },
+    {
+      header: {
+        authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  mapId = map.id;
+  const spaceResponse = await axios.post(
+    `${BACKEND_URL}/api/v1/space`,
+    {
+      name: "MySpace",
+      dimensions: "100x200",
+      mapId,
+    },
+    {
+      header: {
+        authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  spaceId = response.spaceId;
+}
+
+
 
 describe("Authentication", () => {
   test("User is able to sign up only once", async () => {
@@ -268,8 +377,7 @@ describe("Space information", () => {
       `${BACKEND_URL}/api/v1/admin/map`,
       {
         thumbnailURL: "thumbnail_url",
-        length: "100",
-        breadth: "200",
+        dimensions: "100x200",
         defaultElements: [
           {
             elementid: element1Id,
@@ -294,6 +402,7 @@ describe("Space information", () => {
         },
       }
     );
+    mapId = map.id;
   });
 
   test("User is able to create a space", async () => {
@@ -301,8 +410,7 @@ describe("Space information", () => {
       `${BACKEND_URL}/api/v1/space`,
       {
         name: "MySpace",
-        length: 100,
-        breadth: 200,
+        dimensions: "100x200",
         mapId,
       },
       {
@@ -319,8 +427,7 @@ describe("Space information", () => {
       `${BACKEND_URL}/api/v1/space`,
       {
         name: "MySpace",
-        length: 100,
-        breadth: 200,
+        dimensions: "100x200",
       },
       {
         header: {
@@ -378,8 +485,7 @@ describe("Space information", () => {
       `${BACKEND_URL}/api/v1/space`,
       {
         name: "MySpace",
-        length: 100,
-        breadth: 200,
+        dimensions: "100x200",
       },
       {
         header: {
@@ -405,4 +511,54 @@ describe("Space information", () => {
     });
     expect(response.data.spaces.length).toBe(0);
   });
+});
+
+describe("Arena Information", () => {
+  let mapId;
+  let element1Id;
+  let element2Id;
+  let adminToken = "";
+  let adminId = "";
+  let userId = "";
+  let userToken = "";
+  let spaceId = "";
+  beforeAll(async () => {
+    setupHTTP();
+  });
+
+  test("User can access it's own space", async () => {
+    const response = await axios.get(`${BACKEND_URL}/api/v1/space/${spaceId}`, {
+      header: { authorization: `Bearer ${userToken}` },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.data.elements.length).toBe(3);
+  });
+
+  test("Incorrect spaceid return a 400", async () => {
+    const response = await axios.get(
+      `${BACKEND_URL}/api/v1/space/:incorrectSpaceId`,
+      {
+        header: { authorization: `Bearer ${userToken}` },
+      }
+    );
+    expect(response.statusCode).toBe(400);
+  });
+});
+
+describe("Websocket tests", () => {
+  let adminToken = "";
+  let adminId = "";
+  let userId = "";
+  let userToken = "";
+  let element1Id = "";
+  let element2Id = "";
+  let mapId = "";
+  let spaceId = "";
+  beforeAll(() => {
+    setupHTTP();
+  });
+
+  async function setupWebsocket() {
+    ws1= new 
+}
 });
