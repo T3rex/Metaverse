@@ -109,8 +109,6 @@ async function setupHTTP() {
   spaceId = response.spaceId;
 }
 
-
-
 describe("Authentication", () => {
   test("User is able to sign up only once", async () => {
     const username = "Aditya" + Math.random() * 100;
@@ -554,11 +552,155 @@ describe("Websocket tests", () => {
   let element2Id = "";
   let mapId = "";
   let spaceId = "";
-  beforeAll(() => {
-    setupHTTP();
-  });
+  let ws1;
+  let ws2;
+  let ws1Messages;
+  let ws2Messages;
+  let userX;
+  let userY;
+  let adminX;
+  let adminY;
+
+  function waitForOrPopLatestMessage(messageArray) {
+    return new Promise((res, rej) => {
+      if (messageArray.length > 0) {
+        res(messageArray.shift());
+      } else {
+        const interval = setInterval(() => {
+          if (messageArray.length > 0) {
+            clearInterval(interval);
+            res(messageArray.shift());
+          }
+        }, 1000);
+      }
+    });
+  }
 
   async function setupWebsocket() {
-    ws1= new 
-}
+    ws1 = new WebSocket(WEBSOCKET_URL);
+
+    await Promise((res, rej) => {
+      ws1.onopen = res;
+    });
+
+    ws1Messages = (event) => {
+      ws1Messages.push(event.data);
+    };
+
+    ws2 = new WebSocket(WEBSOCKET_URL);
+
+    await Promise((res, rej) => {
+      ws2.onopen = res;
+    });
+
+    ws2Messages = (event) => {
+      ws1Messages.push(event.data);
+    };
+  }
+
+  beforeAll(() => {
+    setupHTTP();
+    setupWebsocket();
+  });
+
+  test("Get back ack for joining the space", async () => {
+    ws1.send(
+      JSON.stringify({
+        type: "join",
+        payload: {
+          spaceId: spaceId,
+          token: adminToken,
+        },
+      })
+    );
+    const message1 = await waitForOrPopLatestMessage(ws1Messages);
+
+    ws2.send(
+      JSON.stringify({
+        type: "join",
+        payload: {
+          spaceId: spaceId,
+          token: userToken,
+        },
+      })
+    );
+    const message2 = await waitForOrPopLatestMessage(ws2Messages);
+    const message3 = await waitForOrPopLatestMessage(ws1Messages);
+
+    adminX = message1.payload.spawn.x;
+    adminY = message1.payload.spawn.y;
+
+    userX = message2.payload.spawn.x;
+    userY = message2.payload.spawn.y;
+
+    expect(message1.type).toBe("space-joined");
+    expect(message2.type).toBe("space-joined");
+    expect(message3.type).toBe("user-join");
+
+    expect(message1.payload.users.length).toBe(0);
+    expect(message2.payload.users.length).toBe(1);
+    expect(message3.payload.x).toBe(userX);
+    expect(message3.payload.y).toBe(userY);
+    expect(message3.payload.userId).toBe(userId);
+  });
+
+  test("User should not to able to move ouside boundaries of space", async () => {
+    ws1.send(
+      JSON.stringify({
+        type: "movement",
+        payload: {
+          x: 9238049,
+          y: 293840293,
+        },
+      })
+    );
+
+    const message1 = await waitForOrPopLatestMessage(ws1Messages);
+    expect(message1.type).toBe("movement-rejected");
+    expect(message1.payload.x).toBe(adminX);
+    expect(message1.payload.y).toBe(adminY);
+  });
+
+  test("User should not to able to move two blocks at a time", async () => {
+    ws1.send(
+      JSON.stringify({
+        type: "movement",
+        payload: {
+          x: adminX + 2,
+          y: adminY,
+        },
+      })
+    );
+
+    const message1 = await waitForOrPopLatestMessage(ws1Messages);
+    expect(message1.type).toBe("movement-rejected");
+    expect(message1.payload.x).toBe(adminX);
+    expect(message1.payload.y).toBe(adminY);
+  });
+
+  test("Correct movement should be broadcasting to the other sockets in the room", async () => {
+    ws1.send(
+      JSON.stringify({
+        type: "movement",
+        payload: {
+          x: adminX + 1,
+          y: adminY,
+          userId: adminId,
+        },
+      })
+    );
+
+    const message1 = await waitForOrPopLatestMessage(ws2Messages);
+    expect(message1.type).toBe("movement");
+    expect(message1.payload.x).toBe(adminX + 1);
+    expect(message1.payload.y).toBe(adminY);
+  });
+
+  test("If a user leave then other users should receive a leave event", async () => {
+    ws1.close();
+
+    const message1 = await waitForOrPopLatestMessage(ws2Messages);
+    expect(message1.type).toBe("user-left");
+    expect(message1.payload.userId).toBe(adminId);
+  });
 });
