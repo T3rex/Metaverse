@@ -1,9 +1,8 @@
 import express from "express";
 import { router } from "./routes/v1";
-import client from "@repo/db/client";
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use("/api/v1", router);
 
