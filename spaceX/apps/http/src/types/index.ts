@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const SignupSchema = z.object({
-  username: z.string().email(),
+  username: z.string(),
   password: z.string().min(8),
   role: z.enum(["Admin", "User"]),
 });

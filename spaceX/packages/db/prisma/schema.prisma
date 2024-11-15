@@ -16,7 +16,7 @@ datasource db {
 model User {
   id       String  @id @unique @default(cuid())
   username String  @unique
-  password String  @unique
+  password String  
   avatarId String?
   role     Role
   spaces   Space[]
@@ -83,3 +83,5 @@ enum Role {
   Admin
   User
 }
+
+//docker run -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres

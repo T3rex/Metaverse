@@ -21,6 +21,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@repo/db": "^1.0.0",
     "pnpm": "^9.13.0"
   }
 }
