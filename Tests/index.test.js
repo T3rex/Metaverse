@@ -164,14 +164,12 @@ describe("Authentication", () => {
       password,
       role: "Admin",
     });
-    //console.log(response);
     expect(response.status).toBe(200);
     const updatedResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
       username,
       password,
       role: "Admin",
     });
-    //console.log(updatedResponse);
     expect(updatedResponse.status).toBe(400);
   });
 
