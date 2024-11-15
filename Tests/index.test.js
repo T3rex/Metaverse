@@ -173,46 +173,49 @@ describe("Authentication", () => {
     expect(updatedResponse.status).toBe(400);
   });
 
-  // test("Signup request fails if username is empty", async () => {
-  //   const username = "Aditya" + Math.random() * 100;
-  //   const password = "password";
-  //   const response = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
-  //     password,
-  //     role: "admin",
-  //   });
-  //   expect(respnse.statusCode).toBe(400);
-  // });
+  test("Signup request fails if username is empty", async () => {
+    const username =
+      "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
+    const password = "password";
+    const response = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+      password,
+      role: "admin",
+    });
+    expect(response.status).toBe(400);
+  });
 
-  // test("Signin succeeds if username and password are correct", async () => {
-  //   const username = "Aditya" + Math.random() * 100;
-  //   const password = "password";
-  //   await axios.post(`${BACKEND_URL}/api/v1/signup`, {
-  //     username,
-  //     password,
-  //   });
+  test("Signin succeeds if username and password are correct", async () => {
+    const username =
+      "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
+    const password = "password";
+    await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+      username,
+      password,
+      role: "Admin",
+    });
+    const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+      username,
+      password,
+    });
+    expect(response.status).toBe(200);
+  });
 
-  //   const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
-  //     username,
-  //     password,
-  //   });
-  //   expect(response.statusCode).toBe(200);
-  //   expect(response.body.token).tobeDefined();
-  // });
+  test("Signin fails if username and password are incorrect", async () => {
+    const username =
+      "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
+    const password = "password";
+    await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+      username,
+      password,
+      role: "Admin",
+    });
 
-  // test("Signin fails if username and password are incorrect", async () => {
-  //   const username = "Aditya" + Math.random() * 100;
-  //   const password = "password";
-  //   await axios.post(`${BACKEND_URL}/api/v1/signup`, {
-  //     username,
-  //     password,
-  //   });
-
-  //   const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
-  //     username: "osjoosdfofmwoeifjo",
-  //     password: "ojasnoand",
-  //   });
-  //   expect(response.statusCode).toBe(403);
-  // });
+    const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+      username: "osjoosdfofmwoeifjo",
+      password: "ojasnoand",
+    });
+    expect(response.status).toBe(400);
+  });
 });
 
 // describe("User Information Endpoints", () => {

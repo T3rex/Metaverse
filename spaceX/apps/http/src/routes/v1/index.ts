@@ -5,11 +5,12 @@ import { spaceRouter } from "./space";
 import client from "@repo/db/client";
 import { SigninSchema, SignupSchema } from "../../types";
 import { compare, hash } from "../../scrypt";
+import jwt from "jsonwebtoken";
+import { JWT_PASSWORD } from "../../config";
 
 export const router = Router();
 
 router.post("/signup", async (req, res) => {
-  console.log(req.body);
   const parseData = SignupSchema.safeParse(req.body);
   if (!parseData.success) {
     res.status(400).json({
@@ -27,48 +28,55 @@ router.post("/signup", async (req, res) => {
         role: parseData?.data?.role === "Admin" ? "Admin" : "User",
       },
     });
-    console.log(user);
     res.status(200).json({
       userId: user.id,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).json({
       message: "User already exists",
     });
   }
 });
 
-router.get("/signin", async (req, res) => {
+router.post("/signin", async (req, res) => {
   const parseData = SigninSchema.safeParse(req.body);
   if (!parseData.success) {
     res.status(400).json({
       message: "Invalid data",
     });
   }
-
-  const user = await client.user.findUnique({
-    where: {
-      username: parseData?.data?.username || "",
-    },
-  });
-  if (!user) {
-    res.status(400).json({
-      message: "User not found",
+  try {
+    const user = await client.user.findUnique({
+      where: {
+        username: parseData?.data?.username,
+      },
     });
-    return;
-  }
-  const isValid = await compare(parseData?.data?.password || "", user.password);
-  if (!isValid) {
-    res.status(400).json({
-      message: "Invalid password",
+    if (!user) {
+      res.status(400).json({
+        message: "User not found",
+      });
+      return;
+    }
+    const isValid = await compare(
+      parseData?.data?.password || "",
+      user.password
+    );
+    if (!isValid) {
+      res.status(400).json({
+        message: "Invalid password",
+      });
+      return;
+    }
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_PASSWORD);
+    res.status(200).json({
+      token,
     });
-    return;
+  } catch (error) {
+    res.status(400).json({ message: "Something went wrong" });
   }
 });
 
 router.get("/elements", (req, res) => {
-  console.log("Hello from spaceX");
   res.json({ message: "Hello from spaceX" });
 });
 
