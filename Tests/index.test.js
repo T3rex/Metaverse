@@ -9,7 +9,6 @@ const axios = {
       const response = await axios2.get(...args);
       return response;
     } catch (error) {
-      console.log(error.response);
       return error.response;
     }
   },

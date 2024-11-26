@@ -35,8 +35,12 @@ export const CreateElementSchema = z.object({
   static: z.boolean(),
 });
 
+export const DeleteElementSchema = z.object({
+  id: z.string(),
+});
+
 export const UpdateElementSchema = z.object({
-  imageURL: z.string(),
+  avatarId: z.string(),
 });
 
 export const CreateAvatarSchema = z.object({
@@ -55,3 +59,12 @@ export const CreateMapSchema = z.object({
     })
   ),
 });
+
+declare global {
+  namespace Express {
+    export interface Request {
+      userId?: string;
+      role?: "Admin" | "User";
+    }
+  }
+}

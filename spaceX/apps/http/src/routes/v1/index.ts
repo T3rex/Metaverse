@@ -84,4 +84,4 @@ router.get("/avatars", (req, res) => {});
 
 router.use("/admin", adminRouter);
 router.use("/user", userRouter);
-router.use("/user", spaceRouter);
+router.use("/space", spaceRouter);
