@@ -8,6 +8,7 @@ import {
 } from "../../types";
 import client from "@repo/db/client";
 import { userMiddleware } from "../../middleware/user";
+import { idText } from "typescript";
 
 export const spaceRouter = Router();
 
@@ -180,4 +181,40 @@ spaceRouter.delete("/element", userMiddleware, async (req, res) => {
   });
 });
 
-spaceRouter.get("/:spaceId");
+spaceRouter.get("/:spaceId", async (req, res) => {
+  const space = await client.space.findUnique({
+    where: {
+      id: req.params.spaceId,
+    },
+    include: {
+      elements: {
+        include: {
+          element: true,
+        },
+      },
+    },
+  });
+  if (!space) {
+    res.status(400).json({
+      message: "Invalid spaceId",
+    });
+  }
+  res.json({
+    dimensions: `${space?.width}x${space?.height}`,
+    elements: space?.elements.map((elements) => {
+      return {
+        id: elements.id,
+        x: elements.x,
+        y: elements.y,
+        elementId: elements.elementId,
+        element: {
+          id: elements.element.id,
+          imageUrl: elements.element.imageUrl,
+          width: elements.element.width,
+          height: elements.element.height,
+          static: elements.element.static,
+        },
+      };
+    }),
+  });
+});
