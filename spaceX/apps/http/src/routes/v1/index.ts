@@ -1,4 +1,4 @@
-import { Router } from "express";
+import e, { Router } from "express";
 import { userRouter } from "./users";
 import { adminRouter } from "./admin";
 import { spaceRouter } from "./space";
@@ -76,11 +76,32 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-router.get("/elements", (req, res) => {
-  res.json({ message: "Hello from spaceX" });
+router.get("/elements", async (req, res) => {
+  const elements = await client.element.findMany();
+  res.json({
+    elements: elements.map((element) => {
+      return {
+        id: element.id,
+        width: element.width,
+        height: element.height,
+        imageUrl: element.imageUrl,
+        static: element.static,
+      };
+    }),
+  });
 });
 
-router.get("/avatars", (req, res) => {});
+router.get("/avatars", async (req, res) => {
+  const avatars = await client.avatar.findMany();
+
+  res.status(200).json({
+    avatars: avatars.map((avatar) => ({
+      id: avatar.id,
+      imageUrl: avatar.imageUrl,
+      name: avatar.name,
+    })),
+  });
+});
 
 router.use("/admin", adminRouter);
 router.use("/user", userRouter);

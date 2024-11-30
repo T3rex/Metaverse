@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { UpdateElementSchema } from "../../types";
+import { UpdateMetadataSchema } from "../../types";
 import client from "@repo/db/client";
 import { userMiddleware } from "../../middleware/user";
 
 export const userRouter = Router();
 
 userRouter.post("/metadata", userMiddleware, async (req, res) => {
-  const parseData = UpdateElementSchema.safeParse(req.body);
+  const parseData = UpdateMetadataSchema.safeParse(req.body);
   if (!parseData.success) {
     res.status(400).json({
       message: "Invalid data",

@@ -29,7 +29,7 @@ export const AddElementSchema = z.object({
 });
 
 export const CreateElementSchema = z.object({
-  imageURL: z.string(),
+  imageUrl: z.string(),
   width: z.number(),
   height: z.number(),
   static: z.boolean(),
@@ -40,17 +40,18 @@ export const DeleteElementSchema = z.object({
 });
 
 export const UpdateElementSchema = z.object({
-  avatarId: z.string(),
+  imageUrl: z.string(),
 });
 
 export const CreateAvatarSchema = z.object({
-  imageURL: z.string(),
+  imageUrl: z.string(),
   name: z.string(),
 });
 
 export const CreateMapSchema = z.object({
   thumbnail: z.string(),
   dimension: z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/),
+  name: z.string(),
   defaultElements: z.array(
     z.object({
       elementId: z.string(),
