@@ -251,9 +251,6 @@ describe("User Information Endpoints", () => {
       }
     );
     avatarId = avatarResponse.data.avatarId;
-    console.log("User Id", userId);
-    console.log("Token", token);
-    console.log("AvatarId", avatarId);
   });
 
   test("User can not update their avatar id with unavailable avatar id", async () => {
@@ -295,54 +292,83 @@ describe("User Information Endpoints", () => {
   });
 });
 
-// describe("User Avatar Information", () => {
-//   let avatarId = "";
-//   let token = "";
-//   let userId = "";
-//   beforeAll(async () => {
-//     const username = "Aditya" + Math.random() * 100;
-//     const password = "password";
-//     const signUpResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
-//       username,
-//       password,
-//       role: "admin",
-//     });
-//     userId = signUpResponse.data.userId;
-//     const signInresponse = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
-//       username,
-//       password,
-//     });
-//     token = signInresponse.data.token;
-//     const avatarResponse = await axios.post(
-//       `${BACKEND_URL}/api/v1/avatar`,
-//       {
-//         imageLink: "link",
-//         name: "Jhonny",
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     avatarId = avatarResponse.data.avatarId;
-//   });
+describe("User Avatar Information", () => {
+  let avatarId = "";
+  let token = "";
+  let userId = "";
+  beforeAll(async () => {
+    const username =
+      "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
+    const password = "password";
+    const signupResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+      username,
+      password,
+      role: "Admin",
+    });
+    userId = signupResponse.data.userId;
+    const signinResponse = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+      username,
+      password,
+    });
 
-//   test("Get back avatar information for a user", async () => {
-//     const response = await axios.get(
-//       `${BACKEND_URL}/api/v1/user/metadata/bulk?ids=${userId}`
-//     );
-//     expect(response.data.avatars.length).toBe(1);
-//     expect(response.data.avatars[0].userId).toBe(userId);
-//   });
+    token = signinResponse.data.token;
 
-//   test("Get all available avatars", async () => {
-//     const response = await axios.get(`${BACKEND_URL}/api/v1/avatars`);
-//     expect(response.data.avatars.length).not.toBe(0);
-//     const currentAvatar = response.data.avatars.find((x) => x.id == avatarId);
-//     expect(currentAvatar).tobeDefined();
-//   });
-// });
+    const avatarResponse = await axios.post(
+      `${BACKEND_URL}/api/v1/admin/avatar`,
+      {
+        imageUrl: "https://x.com/adit_twts/photo",
+        name: "Jhonny",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    avatarId = avatarResponse.data.avatarId;
+    await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId,
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  });
+  // test("User can not update their avatar id with unavailable avatar id", async () => {
+  //   const response = await axios.post(
+  //     `${BACKEND_URL}/api/v1/user/metadata`,
+  //     {
+  //       avatarId: "293842",
+  //     },
+  //     {
+  //       headers: {
+  //         authorization: `Bearer ${token}`,
+  //       },
+  //     }
+  //   );
+
+  //   expect(response.status).toBe(400);
+  // });
+
+  test("Get back avatar information for a user", async () => {
+    const response = await axios.get(
+      `${BACKEND_URL}/api/v1/user/metadata/bulk?ids=[${userId}]`
+    );
+    expect(response.data.avatars.length).toBe(1);
+    expect(response.data.avatars[0].id).toBe(userId);
+  });
+
+  test("Get all available avatars", async () => {
+    const response = await axios.get(`${BACKEND_URL}/api/v1/avatars`);
+    expect(response.data.avatars.length).not.toBe(0);
+    const currentAvatar = response.data.avatars.find((x) => x.id == avatarId);
+    expect(currentAvatar.id).toBe(avatarId);
+  });
+});
 
 // describe("Space information", () => {
 //   let mapId;

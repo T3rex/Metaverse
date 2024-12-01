@@ -40,27 +40,27 @@ userRouter.post(
 userRouter.get("/metadata/bulk", async (req, res) => {
   const userIdsString = (req?.query?.ids ?? "[]") as string;
   const userIdsArray: string[] = userIdsString
-    ?.slice(1, userIdsString?.length - 2)
+    ?.slice(1, userIdsString?.length - 1)
     .split(",");
-
-  const metadata = await client.user.findMany({
-    where: {
-      id: {
-        in: userIdsArray,
+  try {
+    const metadata = await client.user.findMany({
+      where: {
+        id: {
+          in: userIdsArray,
+        },
       },
-    },
-    select: {
-      avatar: true,
-      id: true,
-    },
-  });
-
-  res.status(200).json({
-    avatars: metadata.map((m) => {
-      return {
-        userId: m?.id,
-        avatar: m?.avatar?.imageUrl,
-      };
-    }),
-  });
+      select: {
+        avatar: true,
+        id: true,
+      },
+    });
+    console.log(metadata);
+    res.status(200).json({
+      avatars: metadata,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Something went wrong",
+    });
+  }
 });
