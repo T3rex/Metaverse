@@ -217,76 +217,83 @@ describe("Authentication", () => {
   });
 });
 
-// describe("User Information Endpoints", () => {
-//   let avatarId = "";
-//   let token = "";
-//   let userId = "";
-//   beforeAll(async () => {
-//     const username = "Aditya" + Math.random() * 100;
-//     const password = "password";
-//     const signUpResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
-//       username,
-//       password,
-//       role: "admin",
-//     });
-//     userId = signUpResponse.data.userId;
-//     const signInresponse = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
-//       username,
-//       password,
-//     });
-//     token = signInresponse.data.token;
-//     const avatarResponse = await axios.post(
-//       `${BACKEND_URL}/api/v1/avatar`,
-//       {
-//         imageLink: "link",
-//         name: "Jhonny",
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     avatarId = avatarResponse.data.avatarId;
-//   });
+describe("User Information Endpoints", () => {
+  let avatarId = "";
+  let token = "";
+  let userId = "";
+  beforeAll(async () => {
+    const username =
+      "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
+    const password = "password";
+    const signupResponse = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+      username,
+      password,
+      role: "Admin",
+    });
+    userId = signupResponse.data.userId;
+    const signinResponse = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+      username,
+      password,
+    });
 
-//   test("User can not update their avatar id with unavailable avatar id", async () => {
-//     const response = axios.post(
-//       `${BACKEND_URL}/api/v1/user/metadata`,
-//       {
-//         avatarId: "293842",
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     expect(response.statusCode).toBe(400);
-//   });
+    token = signinResponse.data.token;
 
-//   test("User can update their metadata with an available avatar id", async () => {
-//     const response = axios.post(
-//       `${BACKEND_URL}/api/v1/user/metadata`,
-//       {
-//         avatarId,
-//       },
-//       {
-//         headers: {
-//           authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     expect(response.statusCode).toBe(200);
-//   });
+    const avatarResponse = await axios.post(
+      `${BACKEND_URL}/api/v1/admin/avatar`,
+      {
+        imageUrl: "https://x.com/adit_twts/photo",
+        name: "Jhonny",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    avatarId = avatarResponse.data.avatarId;
+    console.log("User Id", userId);
+    console.log("Token", token);
+    console.log("AvatarId", avatarId);
+  });
 
-//   test("User unable to update metadata if auth head is missing", async () => {
-//     const response = axios.post(`${BACKEND_URL}/api/v1/user/metadata`, {
-//       avatarId,
-//     });
-//     expect(response.statusCode).toBe(403);
-//   });
-// });
+  test("User can not update their avatar id with unavailable avatar id", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId: "293842",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  test("User can update their metadata with an available avatar id", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/user/metadata`,
+      {
+        avatarId,
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    expect(response.status).toBe(200);
+  });
+
+  test("User unable to update metadata if auth head is missing", async () => {
+    const response = await axios.post(`${BACKEND_URL}/api/v1/user/metadata`, {
+      avatarId,
+    });
+    expect(response.status).toBe(403);
+  });
+});
 
 // describe("User Avatar Information", () => {
 //   let avatarId = "";

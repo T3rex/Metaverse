@@ -11,7 +11,7 @@ export const adminMiddleware = (
   const token = header?.split(" ")[1];
 
   if (!token) {
-    res.status(401).json({
+    res.status(403).json({
       message: "Unauthorized",
     });
     return;

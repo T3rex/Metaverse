@@ -2,26 +2,41 @@ import { Router } from "express";
 import { UpdateMetadataSchema } from "../../types";
 import client from "@repo/db/client";
 import { userMiddleware } from "../../middleware/user";
+import { adminMiddleware } from "../../middleware/admin";
 
 export const userRouter = Router();
 
-userRouter.post("/metadata", userMiddleware, async (req, res) => {
-  const parseData = UpdateMetadataSchema.safeParse(req.body);
-  if (!parseData.success) {
-    res.status(400).json({
-      message: "Invalid data",
-    });
-    return;
+userRouter.post(
+  "/metadata",
+  userMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    const parseData = UpdateMetadataSchema.safeParse(req.body);
+    if (!parseData.success) {
+      res.status(400).json({
+        message: "Invalid data",
+      });
+      return;
+    }
+    try {
+      await client.user.update({
+        where: {
+          id: req.userId,
+        },
+        data: {
+          avatarId: parseData?.data?.avatarId,
+        },
+      });
+      res.status(200).json({
+        message: "Metadata updated",
+      });
+    } catch (error) {
+      res.status(400).json({
+        message: "something went wrong",
+      });
+    }
   }
-  await client.user.update({
-    where: {
-      id: req.userId,
-    },
-    data: {
-      avatarId: parseData?.data?.avatarId,
-    },
-  });
-});
+);
 userRouter.get("/metadata/bulk", async (req, res) => {
   const userIdsString = (req?.query?.ids ?? "[]") as string;
   const userIdsArray: string[] = userIdsString

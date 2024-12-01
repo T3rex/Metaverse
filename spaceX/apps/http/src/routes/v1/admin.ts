@@ -55,15 +55,21 @@ adminRouter.post("/avatar", adminMiddleware, async (req, res) => {
     });
     return;
   }
-  const avatar = await client.avatar.create({
-    data: {
-      imageUrl: parseData.data.imageUrl,
-      name: parseData.data.name,
-    },
-  });
-  res.json({
-    avatarId: avatar.id,
-  });
+  try {
+    const avatar = await client.avatar.create({
+      data: {
+        imageUrl: parseData.data.imageUrl,
+        name: parseData.data.name,
+      },
+    });
+    res.json({
+      avatarId: avatar.id,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Something went wrong",
+    });
+  }
 });
 adminRouter.get("/map", adminMiddleware, async (req, res) => {
   const parseData = CreateMapSchema.safeParse(req.body);
