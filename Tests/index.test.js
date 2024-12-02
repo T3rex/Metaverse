@@ -364,8 +364,7 @@ describe("Space information", () => {
   let userId = "";
   let userToken = "";
   beforeAll(async () => {
-    const username =
-      "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
+    let username = "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
     const password = "password";
     const AdminSignupResponse = await axios.post(
       `${BACKEND_URL}/api/v1/signup`,
@@ -387,6 +386,7 @@ describe("Space information", () => {
 
     adminToken = AdminSigninResponse.data.token;
 
+    username = "Aditya" + Math.floor(Math.random() * 100000) + "@gmail.com";
     const userSignUpResponse = await axios.post(
       `${BACKEND_URL}/api/v1/signup`,
       {
@@ -415,7 +415,7 @@ describe("Space information", () => {
         static: true,
       },
       {
-        header: {
+        headers: {
           authorization: `Bearer ${adminToken}`,
         },
       }
@@ -432,7 +432,7 @@ describe("Space information", () => {
         static: true,
       },
       {
-        header: {
+        headers: {
           authorization: `Bearer ${adminToken}`,
         },
       }
@@ -443,33 +443,35 @@ describe("Space information", () => {
     const map = await axios.post(
       `${BACKEND_URL}/api/v1/admin/map`,
       {
-        thumbnailURL: "thumbnail_url",
+        thumbnail: "thumbnail_url",
         dimensions: "100x200",
+        name: "MyMap",
         defaultElements: [
           {
-            elementid: element1Id,
+            elementId: element1Id,
             x: 20,
             y: 30,
           },
           {
-            elementid: element1Id,
+            elementId: element1Id,
             x: 25,
             y: 35,
           },
           {
-            elementid: element2Id,
+            elementId: element2Id,
             x: 23,
             y: 12,
           },
         ],
       },
       {
-        header: {
+        headers: {
           authorization: `Bearer ${adminToken}`,
         },
       }
     );
-    mapId = map.id;
+
+    mapId = map.data.mapId;
   });
 
   test("User is able to create a space", async () => {

@@ -10,7 +10,7 @@ import { adminMiddleware } from "../../middleware/admin";
 
 export const adminRouter = Router();
 
-adminRouter.post("/element/", adminMiddleware, async (req, res) => {
+adminRouter.post("/element", adminMiddleware, async (req, res) => {
   const parseData = CreateElementSchema.safeParse(req.body);
   if (!parseData.success) {
     res.status(400).json({
@@ -18,6 +18,7 @@ adminRouter.post("/element/", adminMiddleware, async (req, res) => {
     });
     return;
   }
+
   const element = await client.element.create({
     data: {
       width: parseData.data.width,
@@ -71,7 +72,7 @@ adminRouter.post("/avatar", adminMiddleware, async (req, res) => {
     });
   }
 });
-adminRouter.get("/map", adminMiddleware, async (req, res) => {
+adminRouter.post("/map", adminMiddleware, async (req, res) => {
   const parseData = CreateMapSchema.safeParse(req.body);
   if (!parseData.success) {
     res.status(400).json({
@@ -79,10 +80,11 @@ adminRouter.get("/map", adminMiddleware, async (req, res) => {
     });
     return;
   }
+
   const map = await client.map.create({
     data: {
-      width: parseInt(parseData.data.dimension.split("x")[0]),
-      height: parseInt(parseData.data.dimension.split("x")[1]),
+      width: parseInt(parseData.data.dimensions.split("x")[0]),
+      height: parseInt(parseData.data.dimensions.split("x")[1]),
       name: parseData.data.name,
       thumbnail: parseData.data.thumbnail,
       mapElements: {
@@ -96,6 +98,7 @@ adminRouter.get("/map", adminMiddleware, async (req, res) => {
       },
     },
   });
+
   res.json({
     mapId: map.id,
   });
