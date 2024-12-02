@@ -10,7 +10,7 @@ import { adminMiddleware } from "../../middleware/admin";
 
 export const adminRouter = Router();
 
-adminRouter.post("/element/:spaceId", adminMiddleware, async (req, res) => {
+adminRouter.post("/element/", adminMiddleware, async (req, res) => {
   const parseData = CreateElementSchema.safeParse(req.body);
   if (!parseData.success) {
     res.status(400).json({
