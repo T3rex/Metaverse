@@ -356,7 +356,7 @@ describe("User Avatar Information", () => {
 });
 
 describe("Space information", () => {
-  let mapId;
+  let mapId = "";
   let element1Id;
   let element2Id;
   let adminToken = "";
@@ -483,59 +483,61 @@ describe("Space information", () => {
         mapId,
       },
       {
-        header: {
+        headers: {
           authorization: `Bearer ${userToken}`,
         },
       }
     );
-    expect(response.spaceId).toBe(undefined);
+    expect(response.data.spaceId).toBeDefined();
   });
 
-  // test("User is able to create a space without mapid", async () => {
-  //   const response = await axios.post(
-  //     `${BACKEND_URL}/api/v1/space`,
-  //     {
-  //       name: "MySpace",
-  //       dimensions: "100x200",
-  //     },
-  //     {
-  //       header: {
-  //         authorization: `Bearer ${userToken}`,
-  //       },
-  //     }
-  //   );
-  //   expect(response.spaceId).toBeDefined();
-  // });
+  test("User is able to create a space without mapid", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "MySpace",
+        dimensions: "100x200",
+        mapId: "",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.data.spaceId).toBeDefined();
+  });
 
-  // test("User is not able to create a space without mapid and dimensions", async () => {
-  //   const response = await axios.post(
-  //     `${BACKEND_URL}/api/v1/space`,
-  //     {
-  //       name: "MySpace",
-  //     },
-  //     {
-  //       header: {
-  //         authorization: `Bearer ${userToken}`,
-  //       },
-  //     }
-  //   );
-  //   expect(response.statusCode).toBe(400);
-  // });
+  test("User is not able to delete a space that is not created", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space/randomIdThatDoesNotExist`,
+      {
+        name: "MySpace",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    console.log(response.data);
+    expect(response.status).toBe(400);
+  });
 
-  // test("User is not able to delete a space that is not created", async () => {
-  //   const response = await axios.delete(
-  //     `${BACKEND_URL}/api/v1/space/randomIdThatDoesNotExist`,
-  //     {
-  //       name: "MySpace",
-  //     },
-  //     {
-  //       header: {
-  //         authorization: `Bearer ${userToken}`,
-  //       },
-  //     }
-  //   );
-  //   expect(response.statusCode).toBe(400);
-  // });
+  test("User is not able to create a space without mapid and dimensions", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "MySpace",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.status).toBe(400);
+  });
 
   // test("User is not able to delete a space that is not created", async () => {
   //   const response = await axios.delete(

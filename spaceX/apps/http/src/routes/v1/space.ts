@@ -16,22 +16,25 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
   const parseData = CreateSpaceSchema.safeParse(req.body);
   if (!parseData.success) {
     res.status(400).json({
-      message: "Invalid data",
+      message: "Invalid dataferfwrf",
     });
     return;
   }
   try {
-    if (parseData.data.mapId) {
-      await client.space.create({
+    if (!parseData.data.mapId) {
+      const space = await client.space.create({
         data: {
           name: parseData.data.name,
-          width: parseInt(parseData.data.dimension.split("x")[0]),
-          height: parseInt(parseData.data.dimension.split("x")[1]),
+          width: parseInt(parseData.data.dimensions.split("x")[0]),
+          height: parseInt(parseData.data.dimensions.split("x")[1]),
           creatorId: req.userId as string,
         },
       });
+      res.status(200).json({
+        spaceId: space.id,
+      });
     } else {
-      const map = await client.map.findUnique({
+      const map = await client.map.findFirst({
         where: {
           id: parseData.data.mapId,
         },
@@ -43,10 +46,10 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
       });
       if (!map) {
         res.status(400).json({
-          message: "Invalid mapId",
+          message: "Invalid mapId1231",
         });
       }
-      await client.$transaction(async () => {
+      let space = await client.$transaction(async () => {
         if (map) {
           const space = await client.space.create({
             data: {
@@ -64,13 +67,22 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
               y: element.y ?? 0,
             })),
           });
+          return space;
         }
       });
+      res.status(200).json({
+        spaceId: space?.id,
+      });
     }
-  } catch (error) {}
+  } catch (error) {
+    res.status(400).json({
+      message: (error as Error).message,
+    });
+  }
 });
 
-spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
+//delete request not sending headers
+spaceRouter.post("/:spaceId", userMiddleware, async (req, res) => {
   try {
     const space = await client.space.findUnique({
       where: {
@@ -84,6 +96,7 @@ spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
       res.status(400).json({
         message: "Invalid spaceId",
       });
+      return;
     }
     if (space?.creatorId != req.userId) {
       res.status(403).json({
@@ -98,7 +111,11 @@ spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
     res.json(200).json({
       message: "Space deleted successfully",
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(400).json({
+      message: (error as Error).message,
+    });
+  }
 });
 spaceRouter.get("/all", userMiddleware, async (req, res) => {
   const spaces = await client.space.findMany({
