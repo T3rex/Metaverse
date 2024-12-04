@@ -520,7 +520,7 @@ describe("Space information", () => {
         },
       }
     );
-    console.log(response.data);
+
     expect(response.status).toBe(400);
   });
 
@@ -539,49 +539,57 @@ describe("Space information", () => {
     expect(response.status).toBe(400);
   });
 
-  // test("User is not able to delete a space that is not created", async () => {
-  //   const response = await axios.delete(
-  //     `${BACKEND_URL}/api/v1/space/randomIdThatDoesNotExist`,
-  //     {
-  //       header: {
-  //         authorization: `Bearer ${userToken}`,
-  //       },
-  //     }
-  //   );
-  //   expect(response.statusCode).toBe(400);
-  // });
+  test("User is not able to delete a space that is not created", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space/randomIdThatDoesNotExist`,
+      {
+        name: "MySpace",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    expect(response.status).toBe(400);
+  });
 
-  // test("User is not able to delete a space of another user", async () => {
-  //   const response = await axios.post(
-  //     `${BACKEND_URL}/api/v1/space`,
-  //     {
-  //       name: "MySpace",
-  //       dimensions: "100x200",
-  //     },
-  //     {
-  //       header: {
-  //         authorization: `Bearer ${userToken}`,
-  //       },
-  //     }
-  //   );
+  test("User is not able to delete a space of another user", async () => {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/space`,
+      {
+        name: "MySpace",
+        dimensions: "100x200",
+      },
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
 
-  //   const deleteResponse = await axios.delete(
-  //     `${BACKEND_URL}/api/v1/space/${response.data.spaceId}`,
-  //     {
-  //       header: {
-  //         authorization: `Bearer ${adminToken}`,
-  //       },
-  //     }
-  //   );
-  //   expect(response.statusCode).toBe(400);
-  // });
+    const deleteResponse = await axios.post(
+      `${BACKEND_URL}/api/v1/space/${response.data.spaceId}`,
+      {},
+      {
+        headers: {
+          authorization: `Bearer ${adminToken}`,
+        },
+      }
+    );
+    console.log(deleteResponse.data);
+    expect(deleteResponse.status).toBe(400);
+  });
 
-  // test("Admin has no space initially", async () => {
-  //   const response = await axios.get(`${BACKEND_URL}/api/v1/space/all`, {
-  //     headers: { authorization: `Bearer ${adminToken}` },
-  //   });
-  //   expect(response.data.spaces.length).toBe(0);
-  // });
+  test("Admin has no space initially", async () => {
+    const response = await axios.get(`${BACKEND_URL}/api/v1/space/all`, {
+      headers: {
+        authorization: `Bearer ${adminToken}`,
+      },
+    });
+    console.log(response.data);
+    expect(response.data.spaces.length).toBe(0);
+  });
 });
 
 // describe("Arena Information", () => {

@@ -9,6 +9,7 @@ import {
 import client from "@repo/db/client";
 import { userMiddleware } from "../../middleware/user";
 import { idText } from "typescript";
+import { adminMiddleware } from "../../middleware/admin";
 
 export const spaceRouter = Router();
 
@@ -123,7 +124,12 @@ spaceRouter.get("/all", userMiddleware, async (req, res) => {
       creatorId: req.userId,
     },
   });
-  res.json(200).json({
+  if (!spaces) {
+    res.json(400).json({
+      spaces: [],
+    });
+  }
+  res.status(200).json({
     spaces: spaces.map((space) => ({
       id: space.id,
       thumbnail: space.thumbnail,

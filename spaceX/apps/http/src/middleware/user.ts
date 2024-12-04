@@ -9,6 +9,7 @@ export const userMiddleware = (
 ) => {
   const header = req.headers["authorization"];
   const token = header?.split(" ")[1];
+
   if (!token) {
     res.status(403).json({
       message: "Authorization failed: Unauthorized",
@@ -21,6 +22,7 @@ export const userMiddleware = (
       role: string;
       userId: string;
     };
+
     req.userId = decoded.userId;
     next();
   } catch (error) {
